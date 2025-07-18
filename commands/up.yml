@@ -1,0 +1,25 @@
+name: Bring the project up
+
+description: |
+  This command is used to bring the project up, which includes starting all necessary services and ensuring the environment is ready for use.
+
+steps:
+  - action: docker-compose-up
+
+  - action: wait-for-services
+    services:
+      - web
+      - database
+      - cache
+
+  - if-option: refresh|fresh
+    then:
+      - action: docker-compose-run
+        service: web
+        command: python manage.py migrate --noinput
+
+  - echo: |
+      The project is now up and running. You can access it at:
+      - Web: http://localhost:8000
+      - Database: http://localhost:5432
+      - Cache: http://localhost:6379

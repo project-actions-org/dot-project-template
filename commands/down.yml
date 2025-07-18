@@ -1,0 +1,13 @@
+name: Bring down the project
+
+description: |
+  This command is used to bring the project down, which includes stopping all services and cleaning up the environment.
+
+steps:
+  - if-option: destroy
+    then:
+      - action: docker-compose-down
+
+  - if-no-option: destroy
+    then:
+      - action: docker-compose-stop
