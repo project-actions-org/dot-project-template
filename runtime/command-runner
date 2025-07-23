@@ -1,0 +1,31 @@
+#!/bin/bash
+
+RUNNER_DIR="$(dirname "$0")"
+RUNNER_NAME="command-runner-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)"
+RUNNER_PATH="$RUNNER_DIR/$RUNNER_NAME"
+
+if [ ! -f "$RUNNER_PATH" ]; then
+  echo "Downloading command runner for $(uname -s) $(uname -m)..."
+  if command -v curl > /dev/null; then
+    curl -L "https://project-actions.org/dist/$RUNNER_NAME" -o "$RUNNER_PATH"
+  elif command -v wget > /dev/null; then
+    wget "https://project-actions.org/dist/$RUNNER_NAME" -O "$RUNNER_PATH"
+  else
+    echo "Error: Neither curl nor wget is available to download the runner."
+    exit 1
+  fi
+  chmod +x "$RUNNER_PATH"
+fi
+
+# Check if the runner is executable
+if [ ! -x "$RUNNER_PATH" ]; then
+    echo "Error: The command runner at $RUNNER_PATH is not executable."
+    exit 1
+fi
+
+PROJECT_SCRIPT_NAME=${PROJECT_SCRIPT_NAME:-$(basename "$0")} "$RUNNER_PATH" "$@"
+
+if [ $? -ne 0 ]; then
+  echo "Error: Command runner failed to execute."
+  exit 1
+fi
